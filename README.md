@@ -7,5 +7,8 @@ Install
 ==
 Edit your copy of the script, then
 
+	git clone https://github.com/dobber/git-notify
+	cd git-clone
+	# edit git-notify.sh
 	cp -a git-notify.sh /usr/local/bin/
 	echo "59 23 * * 7 root /usr/local/bin/git-notify.sh" >> /etc/crontab
