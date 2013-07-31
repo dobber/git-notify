@@ -6,7 +6,7 @@
 mailer="/usr/bin/bsd-mailx"
 repodir="/home/git/repositories/"
 from="From: root@${HOSTNAME}" # $HOSTNAME must be FQDN
-email="admins@amln.net"
+email="your@email.addr"
 template="Here is a list of changes in all repositories in out git"
 subject="Weekly list of git changes"
 period="1.week"
