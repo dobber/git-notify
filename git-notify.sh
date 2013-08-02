@@ -10,13 +10,18 @@ email="your@email.addr"
 template="Here is a list of changes in all repositories in out git"
 subject="Weekly list of git changes"
 period="1.week"
+web="http://git.bastun.net/gitweb/"
 
 ###### DO NOT EDIT BELOW THIS LINE ########
+prettyf="<tr><td><a href=\"${web}/?p=REPO;s=%an;st=author\">%an</a></td><td><a href=\"${web}/?p=REPO;h=%H\">%s</a></td></tr>"
 index=0
 debug=0
 
 function generate_email {
+	repo=$1
+	message=$2
 	if [ $index -eq 0 ] ; then
+		message=`echo ${message} | sed -e s/REPO/${repo}/g`
 		mail="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">
 <html><head><title></title></head><body><p>
 $template<br>
@@ -24,11 +29,12 @@ $template<br>
 	index=1
 
 	fi
-	mail="$mail<br>
-<br>
-$1<br>
-$2<br>
-==============================================<br>"
+	mail="$mail<hr>
+<table border=1>
+<th colspan=2 align=\"center\"><a href=\"${web}/?p=${repo};a=summary\">${repo}</a></th>
+${message}
+</table>
+"
 }
 
 function just_print {
@@ -49,11 +55,9 @@ case "$1" in
 	no-options)
 		echo "Actualy you can just run \`$0\` with no options and it will work too!"
 		debug=0;
-		prettyf="<a href=\"%ae\">%an</a> %s"
 		;;
 	*)
 		debug=0
-		prettyf="<a href=\"%ae\">%an</a> %s"
 esac
 
 if [ ! -d ${repodir} ] ; then
@@ -65,7 +69,7 @@ for repo in `ls ${repodir}/` ; do
 	out=`git --git-dir=${repodir}${repo} log --since=${period} --pretty="${prettyf}"`
 	if [ -n "$out" ] ; then
 		if [ $debug -eq 0 ] ; then
-			out=`echo "${out}" | sed -e 's/$/<br>/g'`
+#			out=`echo "${out}" | sed -e 's/$/<br>/g'`
 			generate_email "${repo}" "${out}"
 		else
 			just_print "${repo}" "${out}"
