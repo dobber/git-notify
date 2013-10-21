@@ -10,28 +10,30 @@ email="your@email.addr"
 template="Here is a list of changes in all repositories in our git"
 subject="Weekly list of git changes"
 period="1.week"
-web="http://git.bastun.net/gitweb/"
+web="http://gitlab.bastun.net/"
 
 ###### DO NOT EDIT BELOW THIS LINE ########
-prettyf="<tr><td><a href=\"${web}/?p=REPO;s=%an;st=author\">%an</a></td><td><a href=\"${web}/?p=REPO;h=%H\">%s</a></td></tr>"
+prettyf="<tr><td><a href=\"${web}/u/USER/\">%an</a></td><td><a href=\"${web}/USER/REPO/commit/%H\">%s</a></td></tr>"
 index=0
 debug=0
 
 function generate_email {
-	repo=$1
-	message=$2
-	if [ $index -eq 0 ] ; then
-		message=`echo ${message} | sed -e s/REPO/${repo}/g`
-		mail="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">
-<html><head><title></title></head><body><p>
-$template<br>
-"
-	index=1
+	user=$1
+	repo=$2
+	message=$3
 
+	message=`echo ${message} | sed -e s/USER/${user}/g`
+	message=`echo ${message} | sed -e s/REPO/${repo}/g`
+	if [ $index -eq 0 ] ; then
+		mail="<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">
+		<html><head><title></title></head><body><p>
+$template<br>"
+		index=1
 	fi
+
 	mail="$mail<hr>
 <table border=1>
-<th colspan=2 align=\"center\"><a href=\"${web}/?p=${repo};a=summary\">${repo}</a></th>
+<th colspan=2 align=\"center\"><a href=\"${web}/${user}/${repo}/commits/master\">${repo}</a></th>
 ${message}
 </table>
 "
@@ -65,21 +67,23 @@ if [ ! -d ${repodir} ] ; then
 	exit 0
 fi
 
-for repo in `ls ${repodir}/` ; do
-	out=`git --git-dir=${repodir}${repo} log --since=${period} --pretty="${prettyf}"`
-	if [ -n "$out" ] ; then
-		if [ $debug -eq 0 ] ; then
-#			out=`echo "${out}" | sed -e 's/$/<br>/g'`
-			generate_email "${repo}" "${out}"
-		else
-			just_print "${repo}" "${out}"
+for user in `ls ${repodir}/` ; do
+	for repo in `ls ${repodir}/${user}/` ; do
+		out=`git --git-dir=${repodir}/${user}/${repo} log --since=${period} --pretty="${prettyf}"`
+		reponame=`echo ${repo} | cut -f 1 -d.`
+		if [ -n "$out" ] ; then
+			if [ $debug -eq 0 ] ; then
+#				out=`echo "${out}" | sed -e 's/$/<br>/g'`
+				generate_email "${user}" "${reponame}" "${out}"
+			else
+				just_print "${reponame}" "${out}"
+			fi
 		fi
-	fi
-
-	unset out
+		unset out
+	done
 done
 
 if [ $debug -eq 0 ] ; then
 	mail="$mail</p></body></html>"
-	echo "${mail}" | ${mailer} -a "${from}" -a "MIME-Version: 1.0" -a "Content-Type: text/html" -s "${subject}" "${email}"
+	echo "${mail}" | ${mailer} -a "${from}" -a "MIME-Version: 1.0" -a "Content-Type: text/html;charset=utf-8" -s "${subject}" "${email}"
 fi
