@@ -10,7 +10,8 @@ email="your@email.addr"
 template="A list of changes in all repositories for the last week"
 subject="Weekly list of git changes"
 period="1.week"
-web="http://gitlab.bastun.net/"
+web="http://gitlab.yourdomain.net/"
+LOGOURL="http://yourdomain.com/logo.jpg"
 
 ###### DO NOT EDIT BELOW THIS LINE ########
 prettyf="%ae
@@ -102,7 +103,7 @@ h1 {
   <tr align=\"center\">
         <th class=\"header\" colspan=\"2\" bgcolor=\"#FFFFFF\" align=\"center\">
 		<h1>
-			<img src=\"http://ancientmedia.com/logo.jpg\" width=\"64\" />
+			<img src=\"$LOGOURL\" width=\"64\" />
 			$subject
 		</h1>
 	</td>
